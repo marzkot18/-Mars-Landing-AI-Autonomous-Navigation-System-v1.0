@@ -41,7 +41,7 @@ model.fc = torch.nn.Linear(model.fc.in_features, 8)
 model = model.to(device)
 
 try:
-    model.load_state_dict(torch.load(MODEL_PATH, map_location=device, weights_only=False))
+    model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     model.eval()
     st.success("✅ Model loaded successfully!")
 except Exception as e:
