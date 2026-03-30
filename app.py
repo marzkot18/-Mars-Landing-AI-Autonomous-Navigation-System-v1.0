@@ -1,7 +1,7 @@
 # ==========================================
 # AUTONOMOUS LANDING (RESNET VERSION)
 # ==========================================
-
+import requests
 import os
 import cv2
 import torch
@@ -11,6 +11,18 @@ import matplotlib.pyplot as plt
 from torch import nn
 from torch.utils.data import Dataset
 from torchvision import models
+MODEL_PATH = "model.pth"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=1BRpK4BcXiBaJ2fG2UCobo0mTJxwJ2CdT"
+if not os.path.exists(MODEL_PATH):
+    st.info("Downloading AI model... (first time only)")
+    
+    r = requests.get(MODEL_URL, stream=True)
+    with open(MODEL_PATH, "wb") as f:
+        for chunk in r.iter_content(chunk_size=8192):
+            if chunk:
+                f.write(chunk)
+
+    st.success("Model ready!")
 
 # ==========================================
 # 1. DATASET
