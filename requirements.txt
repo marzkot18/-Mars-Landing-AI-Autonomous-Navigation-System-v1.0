@@ -6,3 +6,4 @@ opencv-python-headless
 matplotlib
 requests
 pillow
+huggingface_hub>=0.17.0
