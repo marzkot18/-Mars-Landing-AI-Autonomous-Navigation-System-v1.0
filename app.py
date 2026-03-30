@@ -11,18 +11,52 @@ import matplotlib.pyplot as plt
 from torch import nn
 from torch.utils.data import Dataset
 from torchvision import models
+
 MODEL_PATH = "model.pth"
-MODEL_URL = "https://drive.google.com/uc?export=download&id=1BRpK4BcXiBaJ2fG2UCobo0mTJxwJ2CdT"
-if not os.path.exists(MODEL_PATH):
-    st.info("Downloading AI model... (first time only)")
-    
-    r = requests.get(MODEL_URL, stream=True)
-    with open(MODEL_PATH, "wb") as f:
-        for chunk in r.iter_content(chunk_size=8192):
+FILE_ID = "1BRpK4BcXiBaJ2fG2UCobo0mTJxwJ2CdT"  # your Google Drive file ID
+
+def download_file_from_google_drive(file_id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+
+    session = requests.Session()
+
+    response = session.get(URL, params={"id": file_id}, stream=True)
+    token = None
+
+    # Check for confirmation token for large files
+    for key, value in response.cookies.items():
+        if key.startswith("download_warning"):
+            token = value
+
+    if token:
+        params = {"id": file_id, "confirm": token}
+        response = session.get(URL, params=params, stream=True)
+
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(chunk_size=32768):
             if chunk:
                 f.write(chunk)
 
-    st.success("Model ready!")
+# Download if not exists
+if not os.path.exists(MODEL_PATH):
+    st.info("Downloading AI model... (first time only)")
+    download_file_from_google_drive(FILE_ID, MODEL_PATH)
+    st.success("Download complete!")
+
+# Load model
+from torchvision import models
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+model = models.resnet18(pretrained=False)
+model.fc = torch.nn.Linear(model.fc.in_features, 8)
+model = model.to(device)
+
+try:
+    model.load_state_dict(torch.load(MODEL_PATH, map_location=device, weights_only=False))
+    model.eval()
+    st.success("✅ Model loaded successfully!")
+except Exception as e:
+    st.error(f"⚠️ Failed to load model: {e}")
 
 # ==========================================
 # 1. DATASET
