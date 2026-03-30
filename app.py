@@ -126,7 +126,7 @@ model.fc = nn.Linear(model.fc.in_features, 8)
 model = model.to(device)
 
 if os.path.exists("model.pth"):
-    model.load_state_dict(torch.load("model.pth", map_location=device))
+    model.load_state_dict(torch.load("model.pth", map_location=device, weights_only=False))
     model.eval()
 else:
     st.error("⚠️ Model not loaded")
